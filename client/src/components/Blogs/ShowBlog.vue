@@ -3,16 +3,17 @@
         <h1>Show Blog</h1>
         <p>id: {{ blog.id }}</p>
         <p>title: {{ blog.title }}</p>
-        <p>content: {{ blog.content }}</p>
+        <!-- ใช้ v-html เพื่อแสดงเนื้อหาที่เป็น HTML -->
+        <p>content: <span v-html="blog.content"></span></p>
         <p>category: {{ blog.category }}</p>
         <p>status: {{ blog.status }}</p>
         <p>
-        <button v-on:click="navigateTo('/blog/edit/'+ blog.id)">แก้ไข
-        blog</button>
-        <button v-on:click="navigateTo('/blogs')">กลับ </button>
+        <button v-on:click="navigateTo('/blog/edit/'+ blog.id)">แก้ไข blog</button>
+        <button v-on:click="navigateTo('/blogs')">กลับ</button>
         </p>
     </div>
 </template>
+
 <script>
     import BlogsService from '@/services/BlogsService'
     export default {
