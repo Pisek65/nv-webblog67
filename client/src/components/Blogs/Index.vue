@@ -1,77 +1,70 @@
 <template>
-    <section>
+    <div class="container">
         <header class="blog-header">
+            <br><br>
             <h2>ส่วนจัดการบล็อก</h2>
-            <div>
-                <form>
-                    <input type="text" v-model="search" placeholder="Search" aria-label="Search Blogs" />
-                </form>
+            <!--ค้นหาข้อมูล-->
+            <form>
+                <input type="text" v-model="search" placeholder="Search" aria-label="Search Blogs" />
+            </form>
+            <!--สร้าง blog-->
+            <div class="create-blog">
+                <button class="btn btn-success btn-sm" @click="navigateTo('/blog/create')">Create blog</button>
+                <!--จำนวน blog-->
+                <strong> จํานวน blog: </strong> {{ filteredBlogs.length }}
             </div>
-
-            <div>
-                <div class="blog-actions">
-                    <button @click="navigateTo('/blog/create')">Create Blog</button>
-                    <ul class="categories">
-                        <li v-for="cate in category" :key="cate">
-                            <a @click.prevent="setCategory(cate)" href="#">{{ cate }}</a>
-                        </li>
-                        <li class="clear">
-                            <a @click.prevent="setCategory('')" href="#">Clear</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="clearfix"></div>
-                <strong>จำนวน blog: </strong> {{ filteredBlogs.length }}
-            </div>
-            <br />
+            <!--ข้อมูล tag-->
+            <ul class="categories">
+                <li v-for="(cate, index) in category" :key="index">
+                    <a @click.prevent="setCategory(cate)" href="#">{{ cate }}</a>
+                </li>
+                <li class="clear"><a @click.prevent="setCategory(' ')" href="#">Clear</a></li>
+            </ul>
+            <div class="clearfix"></div>
         </header>
 
-        <!-- No data message -->
-        <div v-if="!filteredBlogs.length" class="empty-blog">
-            *** ไม่มีข้อมูล ***
-        </div>
-
-        <!-- Blog list -->
-        <section v-else>
-            <article v-for="blog in paginatedBlogs" :key="blog.id" class="blog-list" aria-labelledby="blogTitle">
+        <transition-group name="fade">
+            <div v-for="blog in filteredBlogs" :key="blog.id" class="blog-list">
                 <div class="blog-pic">
-                    <transition name="fade">
-                        <div v-if="blog.thumbnail && blog.thumbnail !== 'null'" class="thumbnail-pic">
-                            <img :src="BASE_URL + blog.thumbnail" alt="Blog Thumbnail" />
-                        </div>
-                    </transition>
-                </div>
-
-                <h3>{{ blog.title }}</h3>
-                <div v-html="blog.content.slice(0, 200) + '...'"></div>
-
-                <div class="blog-info">
-                    <p><strong>Category:</strong> {{ blog.category }}</p>
-                    <p><strong>Create:</strong> {{ formatDate(blog.createdAt) }}</p>
-                    <div class="blog-actions">
-                        <button @click="navigateTo('/blog/' + blog.id)">ดู Blog</button>
-                        <button @click="navigateTo('/blog/edit/' + blog.id)">แก้ไข Blog</button>
-                        <button @click="deleteBlog(blog)">ลบข้อมูล</button>
+                    <div class="thumbnail-pic" v-if="blog.thumbnail && blog.thumbnail !== 'null'">
+                        <img :src="BASE_URL + blog.thumbnail" alt="thumbnail">
                     </div>
                 </div>
-                <div class="clearfix"></div>
-            </article>
 
-            <!-- Load complete message -->
-            <footer id="blog-list-bottom">
-                <div v-if="paginatedBlogs.length === filteredBlogs.length && filteredBlogs.length > 0">
-                    โหลดข้อมูลครบแล้ว
+                <div class="blog-info">
+                    <h3>{{ blog.title }}</h3>
+                    <!--เพิ่มตัวอักษรให้เยอะขึ้น-->
+                    <div v-html="blog.content.slice(0, 1000) + '...'"></div>
+                    <p><strong>Category:</strong> {{ blog.category }}</p>
+                    <p><strong>Create:</strong> {{ formatDate(blog.createdAt) }}</p>
+                    <p>
+                        <button class="btn btn-sm btn-info" @click="navigateTo('/blog/' + blog.id)">View Blog</button>
+                        <button class="btn btn-sm btn-warning" @click="navigateTo('/blog/edit/' + blog.id)">Edit blog</button>
+                        <button class="btn btn-sm btn-danger" @click="deleteBlog(blog)">Delete</button>
+                    </p>
                 </div>
-            </footer>
-        </section>
-    </section>
+                <div class="clearfix"></div>
+            </div>
+        </transition-group>
+
+        <div v-if="filteredBlogs.length === 0 && !loading" class="empty-blog">
+            *** ไม่มีข้อมูล ***
+        </div>
+        <div id="blog-list-bottom">
+            <div class="blog-load-finished" v-if="filteredBlogs.length === results.length && results.length > 0">
+                โหลดข้อมูลครบแล้ว
+            </div>
+        </div>
+    </div>
 </template>
-  
+
 <script>
 import BlogsService from '@/services/BlogsService';
 import _ from 'lodash';
 import ScrollMonitor from 'scrollMonitor';
-import axios from 'axios';
+
+const LOAD_NUM = 3;
+let pageWatcher;
 
 export default {
     data() {
@@ -79,30 +72,27 @@ export default {
             blogs: [],
             search: '',
             BASE_URL: 'http://localhost:8081/assets/uploads/',
-            LOAD_NUM: 3,
-            pageWatcher: null,
             allBlogs: [],
-            currentPage: 1,
             results: [],
             category: [],
             loading: false,
         };
     },
     async created() {
-        await this.refreshData();
+        this.allBlogs = (await BlogsService.index()).data; // ดึงข้อมูลทั้งหมดและเก็บไว้ใน allBlogs
+        this.results = this.allBlogs; // เริ่มต้นผลลัพธ์ด้วยบล็อกทั้งหมด
+        this.blogs = this.allBlogs.slice(0, LOAD_NUM); // แสดงบล็อกตามจำนวนที่ต้องการ
+        this.populateCategories(); // Populate categories
     },
     computed: {
         filteredBlogs() {
-            if (this.search) {
-                return this.allBlogs.filter((blog) =>
-                    blog.title.toLowerCase().includes(this.search.toLowerCase()) ||
-                    blog.category.toLowerCase().includes(this.search.toLowerCase())
-                );
+            if (this.search.trim() === '') {
+                return this.allBlogs; // แสดงทั้งหมดหากไม่มีการค้นหา
             }
-            return this.allBlogs;
-        },
-        paginatedBlogs() {
-            return this.filteredBlogs.slice(0, this.currentPage * this.LOAD_NUM);
+            return this.allBlogs.filter(blog =>
+                blog.title.toLowerCase().includes(this.search.toLowerCase()) ||
+                blog.category.toLowerCase().includes(this.search.toLowerCase())
+            );
         },
     },
     methods: {
@@ -110,40 +100,20 @@ export default {
             this.$router.push(route);
         },
         async deleteBlog(blog) {
-            let result = confirm("Want to delete?")
-            if (result) {
-                try {
-                    await BlogsService.delete(blog)
-                    this.refreshData()
-                } catch (err) {
-                    console.log(err)
-                }
+            try {
+                await BlogsService.delete(blog);
+                this.refreshData();
+            } catch (err) {
+                console.log(err);
             }
         },
         async refreshData() {
-            try {
-                const response = await BlogsService.index();
-                console.log('Blogs fetched:', response.data); // เพิ่ม log
-                this.allBlogs = response.data;
-                this.populateCategories();
-            } catch (error) {
-                console.error('Error fetching blogs:', error);
-            }
-        },
-        loadMoreBlogs() {
-            this.currentPage++;
-        },
-        handleScroll() {
-            if (this.pageWatcher && this.pageWatcher.isInViewport) {
-                this.loadMoreBlogs();
-            }
-        },
-        formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('th-TH', options);
+            this.allBlogs = (await BlogsService.index()).data;
+            this.results = this.allBlogs;
+            this.blogs = this.allBlogs.slice(0, LOAD_NUM); // อัปเดตข้อมูลให้แสดงตามจำนวน
         },
         setCategory(keyword) {
-            this.search = keyword.trim();
+            this.search = keyword === ' ' ? '' : keyword;
         },
         populateCategories() {
             this.allBlogs.forEach(blog => {
@@ -152,28 +122,25 @@ export default {
                 }
             });
         },
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('th-TH', options);
+        },
     },
-    watch: {
-        search: _.debounce(async function (value) {
-            const route = { name: 'blogs' };
-            if (this.search !== '') {
-                route.query = { search: this.search };
-            }
-            this.$router.push(route);
-        }, 700),
-    },
-    mounted() {
+    updated() {
         const sens = document.querySelector('#blog-list-bottom');
-        this.pageWatcher = ScrollMonitor.create(sens);
-        this.pageWatcher.enterViewport(this.handleScroll);
+        pageWatcher = ScrollMonitor.create(sens);
+        pageWatcher.enterViewport(this.appendResults);
     },
-    beforeDestroy() {
-        if (this.pageWatcher) {
-            this.pageWatcher.destroy();
+    beforeUpdated() {
+        if (pageWatcher) {
+            pageWatcher.destroy();
+            pageWatcher = null;
         }
     },
 };
 </script>
+
 <style scoped>
 .empty-blog {
     width: 100%;
@@ -188,36 +155,46 @@ export default {
     padding: 5px 10px 0 0;
 }
 
-.blog-info,
+.blog-list {
+    display: flex; /* ใช้ flexbox เพื่อจัดตำแหน่ง */
+    border: solid 1px #dfdfdf;
+    margin-bottom: 10px;
+    padding: 5px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .1);
+}
+
 .blog-pic {
-    float: left;
+    margin-right: 10px; /* เพิ่มระยะห่างระหว่างรูปภาพและข้อมูล */
+}
+
+.blog-info {
+    flex: 3; /* ให้ข้อมูลใช้พื้นที่ว่างที่เหลือ */
 }
 
 .clearfix {
     clear: both;
 }
 
-.blog-list {
-    border: solid 1px #dfdfdf;
-    margin-bottom: 10px;
-    max-width: 900px;
-    margin: 10px auto;
-    padding: 10px;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+.blog-header {
+    margin: 0 auto;
 }
 
 #blog-list-bottom {
-    padding: 30px;
+    padding-top: 4px;
+}
+
+.blog-load-finished {
+    padding: 4px;
     text-align: center;
-    background: rgb(49, 219, 123);
+    background: seagreen;
     color: white;
 }
 
 /* Categories */
 .categories {
+    margin-top: 10px;
     padding: 0;
     list-style: none;
-    float: left;
 }
 
 .categories li {
@@ -237,18 +214,7 @@ export default {
     color: white;
 }
 
-.blog-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    /* จัดให้อยู่ซ้ายสุด */
-    gap: 20px;
-    /* ระยะห่างระหว่างปุ่มกับหมวดหมู่ */
-
-}
-
-.blog-actions button {
-    margin-right: 20px;
-    /* เพิ่มระยะห่างจากปุ่มกับหมวดหมู่ถ้าต้องการ */
+.create-blog {
+    margin-top: 10px;
 }
 </style>

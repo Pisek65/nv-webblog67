@@ -1,5 +1,6 @@
 <template>
   <div>
+    <br><br>
     <h1>Edit User</h1>
     <form v-on:submit.prevent = "editUser">
       <div>name: <input type="text" v-model="user.name"></div>

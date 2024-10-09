@@ -1,17 +1,33 @@
 <template>
   <div>
-    <div class="nv-navbar">
-      <ul class="nav">
-        <li><router-link :to="{ name: 'blogs' }">Blogs</router-link></li>
-        <li><router-link :to="{ name: 'users' }">Users</router-link></li>
-        <li><router-link :to="{ name: 'comments' }">Comments</router-link></li>
-        <!-- if isLogin is true, show logout menu. otherwise, show login menu-->
-        <li><router-link :to="{ name: 'login' }">Login</router-link></li>
-        <li><a v-on:click.prevent="logout" href="#">Logout</a></li>
-      </ul>
+    <!-- New Navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand navbar-link" href="#" @click.prevent="navigateTo('/dashboard')">
+            <img src="../assets/logo.png" id="logo" alt="Logo">
+          </a>
+          <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="collapse navbar-collapse" id="navcol-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li role="presentation"><router-link :to="{ name: 'blogs' }">Blogs</router-link></li>
+            <li role="presentation"><router-link :to="{ name: 'users' }">Users</router-link></li>
+            <li role="presentation"><router-link :to="{ name: 'comments' }">Comments</router-link></li>
+            <li role="presentation"><router-link :to="{ name: 'login' }">Login</router-link></li>
+            <li role="presentation"><a href="#" @click="logout">Logout</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
 <script>
 
 export default {
@@ -21,52 +37,25 @@ export default {
       return this.$store.getters.isUserLoggedIn;
     },
     logout() {
-      this.$store.dispatch('setToken', null)
-      this.$store.dispatch('setUser', null)
-      this.$router.push({
-        name: 'login'
-      })
+      this.$store.dispatch('setToken', null);
+      this.$store.dispatch('setUser', null);
+      this.$router.push({ name: 'login' });
+    },
+    navigateTo(route) {
+      this.$router.push(route);
     }
   }
 };
 </script>
+
 <style scoped>
-.nv-navbar {
-  background-color: palegoldenrod;
-  width: 100%;
-  height: 60px;
-  padding: 10px 0px 10px 0px;
+.navbar-brand>img {
+  width: 40px;
+  padding: 2px 0;
+  margin-top: -10px;
 }
 
-.nv-navbar .nav {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  float: left;
+a.router-link-active {
+  color: yellowgreen !important;
 }
-
-.nv-navbar .nav li {
-  float: left;
-}
-
-.nv-navbar .nav li a {
-  padding: 10px;
-  text-decoration: none;
-  color: gray;
-  font-weight: bold;
-}
-
-.nv-navbar .nav li a:hover {
-  padding: 10px;
-  text-decoration: none;
-  color: darkslategrey;
-}
-
-.nv-navbar .nav li a.router-link-active {
-  background-color: gold;
-  color: darkslategrey;
-}
-
-.clearfix {
-  clear: left;
-}</style>
+</style>

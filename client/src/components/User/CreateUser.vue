@@ -1,5 +1,6 @@
 <template>
   <div>
+    <br><br>
     <h1>Create User</h1>
     <form v-on:submit.prevent="createUser">
       <div>

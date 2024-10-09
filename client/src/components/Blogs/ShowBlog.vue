@@ -1,5 +1,6 @@
 <template>
     <div>
+        <br><br>
         <h1>Show Blog</h1>
         <p>id: {{ blog.id }}</p>
         <p>title: {{ blog.title }}</p>

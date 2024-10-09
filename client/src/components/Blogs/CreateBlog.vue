@@ -1,5 +1,6 @@
 <template>
   <div>
+    <br><br>
     <h1>Create Blog</h1>
     <form v-on:submit.prevent="createBlog">
       <p>
