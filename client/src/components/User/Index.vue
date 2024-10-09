@@ -1,5 +1,6 @@
 <template>
   <div>
+    <br><br>
     <h1>Get All Users</h1>
     <div><button v-on:click="navigateTo('/user/create')">สร้างผู้ใช้</button></div>
     <hr>

@@ -2,9 +2,10 @@
   <div>
     <br><br>
     <h1>Create Blog</h1>
+    <!--ชื่อ title-->
     <form v-on:submit.prevent="createBlog">
       <p>
-        title:
+        ชื่อ figure:
         <input type="text" v-model="blog.title" />
       </p>
       <transition name="fade">
@@ -12,6 +13,7 @@
           <img :src="BASE_URL + blog.thumbnail" alt="thumbnail" />
         </div>
       </transition>
+      <!--เพิ่มรูป-->
       <form enctype="multipart/form-data" novalidate>
         <div class="dropbox">
           <input
@@ -52,6 +54,7 @@
         </transition-group>
         <div class="clearfix"></div>
       </div>
+      <!--ข้อมูล-->
       <p>
         <strong>content:</strong>
       </p>
@@ -70,7 +73,7 @@
         <input type="text" v-model="blog.status" />
       </p>
       <p>
-        <button type="submit">create blog</button>
+        <button type="submit">create</button>
       </p>
     </form>
   </div>

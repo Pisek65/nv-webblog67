@@ -2,16 +2,16 @@
     <div class="container">
         <header class="blog-header">
             <br><br>
-            <h2>ส่วนจัดการบล็อก</h2>
+            <h2>แสดง figure ทั้งหมด</h2>
             <!--ค้นหาข้อมูล-->
             <form>
                 <input type="text" v-model="search" placeholder="Search" aria-label="Search Blogs" />
             </form>
             <!--สร้าง blog-->
             <div class="create-blog">
-                <button class="btn btn-success btn-sm" @click="navigateTo('/blog/create')">Create blog</button>
+                <button class="btn btn-success btn-sm" @click="navigateTo('/blog/create')">Create</button>
                 <!--จำนวน blog-->
-                <strong> จํานวน blog: </strong> {{ filteredBlogs.length }}
+                <strong> จํานวนข้อมูล : </strong> {{ filteredBlogs.length }}
             </div>
             <!--ข้อมูล tag-->
             <ul class="categories">
@@ -34,7 +34,7 @@
                 <div class="blog-info">
                     <h3>{{ blog.title }}</h3>
                     <!--เพิ่มตัวอักษรให้เยอะขึ้น-->
-                    <div v-html="blog.content.slice(0, 1000) + '...'"></div>
+                    <div v-html="blog.content.slice(0, 200) + '...'"></div>
                     <p><strong>Category:</strong> {{ blog.category }}</p>
                     <p><strong>Create:</strong> {{ formatDate(blog.createdAt) }}</p>
                     <p>

@@ -7,7 +7,7 @@ import UserCreate from '@/components/User/CreateUser'
 import UserShow from '@/components/User/ShowUser'
 import Login from '@/components/Login'
 
-import CommentIndex from '@/components/Comments/index' 
+
 
 import BlogIndex from '@/components/Blogs/index'
 import BlogCreate from '@/components/Blogs/CreateBlog'
