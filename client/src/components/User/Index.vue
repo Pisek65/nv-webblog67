@@ -75,5 +75,62 @@ export default {
 </script>
 
 <style scoped>
-/* คุณสามารถเพิ่มสไตล์ที่ต้องการตรงนี้ */
+  div {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-right: 10px;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  hr {
+    margin: 20px 0;
+  }
+
+  .user-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .user-info {
+    margin-bottom: 10px;
+  }
+
+  .user-info b {
+    color: #333;
+  }
+
+  .no-data {
+    text-align: center;
+    font-size: 1.2em;
+    color: #777;
+  }
 </style>
+

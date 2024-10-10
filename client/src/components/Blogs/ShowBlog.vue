@@ -39,4 +39,41 @@
     }
 </script>
 <style scoped>
+    div {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+        color: #333;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1.1em;
+        line-height: 1.5;
+        color: #555;
+        margin: 10px 0;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-right: 10px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
 </style>
