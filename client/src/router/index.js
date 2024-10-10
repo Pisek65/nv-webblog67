@@ -67,11 +67,6 @@ export default new Router({
       component: BlogShow
     },
     {
-      path: '/comments',
-      name: 'comments',
-      component: CommentIndex
-    },
-    {
       path: '/upload',
       name: 'upload',
       component: Upload
