@@ -6,28 +6,18 @@
     <form v-on:submit.prevent="createBlog">
       <p>
         ชื่อ figure:
-        <input type="text" v-model="blog.title" />
+        <input type="text" v-model="blog.namecharacter" />
       </p>
       <transition name="fade">
         <div class="thumbnail-pic" v-if="blog.thumbnail != 'null'">
           <img :src="BASE_URL + blog.thumbnail" alt="thumbnail" />
         </div>
       </transition>
-      <!--เพิ่มรูป-->
-      <form enctype="multipart/form-data" novalidate>
+      <!-- เพิ่มรูป -->
+      <div enctype="multipart/form-data" novalidate>
         <div class="dropbox">
-          <input
-            type="file"
-            multiple
-            :name="uploadFieldName"
-            :disabled="isSaving"
-            @change="
-              filesChange($event.target.name, $event.target.files);
-              fileCount = $event.target.files.length;
-            "
-            accept="image/*"
-            class="input-file"
-          />
+          <input type="file" multiple :name="uploadFieldName" :disabled="isSaving"
+            @change="(e) => filesChange(e.target.name, e.target.files)" accept="image/*" class="input-file" />
           <!-- <p v-if="isInitial || isSuccess"> -->
           <p v-if="isInitial">
             Drag your file(s) here to begin<br />
@@ -36,40 +26,26 @@
           <p v-if="isSaving">Uploading {{ fileCount }} files...</p>
           <p v-if="isSuccess">Upload Successful.</p>
         </div>
-      </form>
+      </div>
       <div>
         <transition-group tag="ul" class="pictures">
-          <li v-for="picture in pictures" v-bind:key="picture.id">
-            <img
-              style="margin-bottom: 5px"
-              :src="BASE_URL + picture.name"
-              alt="picture image"
-            />
+          <li v-for="picture in pictures" :key="picture.id">
+            <img :src="BASE_URL + picture.name" alt="picture image" />
             <br />
-            <button v-on:click.prevent="useThumbnail(picture.name)">
-              Thumbnail
-            </button>
-            <button v-on:click.prevent="delFile(picture)">Delete</button>
+            <button @click.prevent="useThumbnail(picture.name)">Thumbnail</button>
+            <button @click.prevent="delFile(picture)">Delete</button>
           </li>
         </transition-group>
         <div class="clearfix"></div>
       </div>
-      <!--ข้อมูล-->
+      <p><strong>content:</strong></p>
+      <vue-ckeditor v-model.lazy="blog.content" :config="config" @blur="onBlur" @focus="onFocus" />
       <p>
-        <strong>content:</strong>
-      </p>
-      <vue-ckeditor
-        v-model.lazy="blog.content"
-        :config="config"
-        @blur="onBlur($event)"
-        @focus="onFocus($event)"
-      />
-      <p>
-        category:
-        <input type="text" v-model="blog.category" />
+        namefigure:
+        <input type="text" v-model="blog.namefigure" />
       </p>
       <p>
-        status:
+        material:
         <input type="text" v-model="blog.status" />
       </p>
       <p>
@@ -78,15 +54,13 @@
     </form>
   </div>
 </template>
+
 <script>
 import BlogsService from "@/services/BlogsService";
 import VueCkeditor from "vue-ckeditor2";
-import UploadService from "../../services/UploadService";
+import UploadService from "@/services/UploadService";
 
-const STATUS_INITIAL = 0,
-  STATUS_SAVING = 1,
-  STATUS_SUCCESS = 2,
-  STATUS_FAILED = 3;
+const status_INITIAL = 0, status_SAVING = 1, status_SUCCESS = 2, status_FAILED = 3;
 
 export default {
   data() {
@@ -95,109 +69,67 @@ export default {
       error: null,
       // uploadedFiles: [],
       uploadError: null,
-      currentStatus: null,
+      currentstatus: null,
       uploadFieldName: "userPhoto",
       uploadedFileNames: [],
       pictures: [],
       pictureIndex: 0,
       blog: {
-        title: "",
+        namecharacter: "",
         thumbnail: "null",
         pictures: "null",
         content: "",
-        category: "",
-        status: "saved",
+        namefigure: "",
+        status: "",
       },
       config: {
-        toolbar: [
-          ["Bold", "Italic", "Underline", "Strike", "Subscript", "Superscript"],
-        ],
+        toolbar: [["Bold", "Italic", "Underline", "Strike", "Subscript", "Superscript"]],
         height: 300,
       },
     };
   },
   methods: {
     async delFile(material) {
-      let result = confirm("Want to delete?");
-      if (result) {
-        let dataJSON = {
-          filename: material.name,
-        };
-
-        await UploadService.delete(dataJSON);
-        for (var i = 0; i < this.pictures.length; i++) {
-          if (this.pictures[i].id === material.id) {
-            this.pictures.splice(i, 1);
-            this.materialIndex--;
-            break;
-          }
-        }
+      if (confirm("Want to delete?")) {
+        await UploadService.delete({ filename: material.name });
+        this.pictures = this.pictures.filter(picture => picture.id !== material.id);
       }
     },
     async createBlog() {
       this.blog.pictures = JSON.stringify(this.pictures);
-      console.log("JSON.stringify: ", this.blog);
+      console.log("Blog data before posting:", this.blog);
       try {
         await BlogsService.post(this.blog);
-        this.$router.push({
-          name: "blogs",
-        });
+        console.log("Blog created successfully!");
+        this.$router.push({ name: "blogs" });
       } catch (err) {
-        console.log(err);
+        console.error("Error creating blog:", err);
       }
     },
-    onBlur(editor) {
-      console.log(editor);
-    },
-    onFocus(editor) {
-      console.log(editor);
-    },
-    navigateTo(route) {
-      console.log(route);
-      this.$router.push(route);
-    },
-    wait(ms) {
-      return (x) => {
-        return new Promise((resolve) => setTimeout(() => resolve(x), ms));
-      };
-    },
-    reset() {
-      // reset form to initial state
-      this.currentStatus = STATUS_INITIAL;
-      // this.uploadedFiles = []
-      this.uploadError = null;
-      this.uploadedFileNames = [];
+    filesChange(fieldName, fileList) {
+      const formData = new FormData();
+      Array.from(fileList).forEach(file => {
+        formData.append(fieldName, file);
+        this.uploadedFileNames.push(file.name);
+      });
+      this.save(formData);
     },
     async save(formData) {
       // upload data to the server
       try {
-        this.currentStatus = STATUS_SAVING;
+        this.currentstatus = status_SAVING;
         await UploadService.upload(formData);
-        this.currentStatus = STATUS_SUCCESS;
-
-        // update image uploaded display
-        let pictureJSON = [];
-        this.uploadedFileNames.forEach((uploadFilename) => {
-          let found = false;
-          for (let i = 0; i < this.pictures.length; i++) {
-            if (this.pictures[i].name == uploadFilename) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
+        this.currentstatus = status_SUCCESS;
+        this.uploadedFileNames.forEach(uploadFilename => {
+          if (!this.pictures.some(picture => picture.name === uploadFilename)) {
             this.pictureIndex++;
-            let pictureJSON = {
-              id: this.pictureIndex,
-              name: uploadFilename,
-            };
-            this.pictures.push(pictureJSON);
+            this.pictures.push({ id: this.pictureIndex, name: uploadFilename });
           }
         });
         this.clearUploadResult();
       } catch (error) {
         console.log(error);
-        this.currentStatus = STATUS_FAILED;
+        this.currentstatus = status_FAILED;
       }
     },
     filesChange(fieldName, fileList) {
@@ -221,24 +153,15 @@ export default {
     },
   },
   computed: {
-    isInitial() {
-      return this.currentStatus === STATUS_INITIAL;
-    },
-    isSaving() {
-      return this.currentStatus === STATUS_SAVING;
-    },
-    isSuccess() {
-      return this.currentStatus === STATUS_SUCCESS;
-    },
-    isFailed() {
-      return this.currentStatus === STATUS_FAILED;
-    },
+    isInitial() { return this.currentstatus === status_INITIAL; },
+    isSaving() { return this.currentstatus === status_SAVING; },
+    isSuccess() { return this.currentstatus === status_SUCCESS; },
   },
   components: {
     VueCkeditor,
   },
   created() {
-    this.currentStatus = STATUS_INITIAL;
+    this.currentstatus = status_INITIAL;
     this.config.toolbar = [
       {
         name: "document",
@@ -345,19 +268,21 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .dropbox {
-  outline: 2px dashed grey; /* the dash box */
+  outline: 2px dashed grey;
   outline-offset: -10px;
   background: lemonchiffon;
   color: dimgray;
-  padding: 10px 10px;
-  min-height: 200px; /* minimum height */
+  padding: 10px;
+  min-height: 200px;
   position: relative;
   cursor: pointer;
 }
+
 .input-file {
-  opacity: 0; /* invisible but it's there! */
+  opacity: 0;
   width: 100%;
   height: 200px;
   position: absolute;
@@ -365,8 +290,7 @@ export default {
 }
 
 .dropbox:hover {
-  background: khaki; /* when mouse over to the drop zone, change color 
-*/
+  background: khaki;
 }
 
 .dropbox p {
@@ -374,6 +298,7 @@ export default {
   text-align: center;
   padding: 50px 0;
 }
+
 ul.pictures {
   list-style: none;
   padding: 0;
@@ -382,16 +307,20 @@ ul.pictures {
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
 ul.pictures li {
   float: left;
 }
+
 ul.pictures li img {
   max-width: 180px;
   margin-right: 20px;
 }
+
 .clearfix {
   clear: both;
 }
+
 /* thumbnail */
 .thumbnail-pic img {
   width: 200px;

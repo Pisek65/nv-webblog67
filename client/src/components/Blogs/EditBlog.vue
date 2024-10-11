@@ -3,7 +3,7 @@
     <br><br>
     <h1>Edit Blog</h1>
     <form v-on:submit.prevent="editBlog">
-      <p>ชื่อ figure: <input type="text" v-model="blog.title" /></p>
+      <p>ชื่อ figure: <input type="text" v-model="blog.namecharacter" /></p>
       <transition name="fade">
         <div class="thumbnail-pic" v-if="blog.thumbnail != 'null'">
           <img :src="BASE_URL + blog.thumbnail" alt="thumbnail" />
@@ -36,8 +36,8 @@
       <div class="clearfix"></div>
       <p><strong>content:</strong></p>
       <vue-ckeditor v-model.lazy="blog.content" :config="config" @blur="onBlur($event)" @focus="onFocus($event)" />
-      <p>category: <input type="text" v-model="blog.category" /></p>
-      <p>status: <input type="text" v-model="blog.status" /></p>
+      <p>namefigure: <input type="text" v-model="blog.namefigure" /></p>
+      <p>material: <input type="text" v-model="blog.status" /></p>
       <p>
         <button type="submit">update blog</button>
         <button v-on:click="navigateTo('/blogs')">กลับ</button>
@@ -51,10 +51,10 @@ import BlogsService from "@/services/BlogsService";
 import VueCkeditor from "vue-ckeditor2";
 import UploadService from "../../services/UploadService";
 
-const STATUS_INITIAL = 0,
-  STATUS_SAVING = 1,
-  STATUS_SUCCESS = 2,
-  STATUS_FAILED = 3;
+const status_INITIAL = 0,
+  status_SAVING = 1,
+  status_SUCCESS = 2,
+  status_FAILED = 3;
 
 export default {
   components: { VueCkeditor },
@@ -64,17 +64,17 @@ export default {
       error: null,
       // uploadedFiles: [],
       uploadError: null,
-      currentStatus: null,
+      currentstatus: null,
       uploadFieldName: "userPhoto",
       uploadedFileNames: [],
       pictures: [],
       pictureIndex: 0,
       blog: {
-        title: "",
+        namecharacter: "",
         thumbnail: "null",
         pictures: "null",
         content: "",
-        category: "",
+        namefigure: "",
         status: "",
       },
       config: {
@@ -130,7 +130,7 @@ export default {
     },
     reset() {
       // reset form to initial state
-      this.currentStatus = STATUS_INITIAL;
+      this.currentstatus = status_INITIAL;
       // this.uploadedFiles = []
       this.uploadError = null;
       this.uploadedFileNames = [];
@@ -138,9 +138,9 @@ export default {
     async save(formData) {
       // upload data to the server
       try {
-        this.currentStatus = STATUS_SAVING;
+        this.currentstatus = status_SAVING;
         await UploadService.upload(formData);
-        this.currentStatus = STATUS_SUCCESS;
+        this.currentstatus = status_SUCCESS;
 
         // update image uploaded display
         let pictureJSON = [];
@@ -164,7 +164,7 @@ export default {
         this.clearUploadResult();
       } catch (error) {
         console.log(error);
-        this.currentStatus = STATUS_FAILED;
+        this.currentstatus = status_FAILED;
       }
     },
     filesChange(fieldName, fileList) {
@@ -189,23 +189,23 @@ export default {
   },
   computed: {
     isInitial() {
-      return this.currentStatus === STATUS_INITIAL;
+      return this.currentstatus === status_INITIAL;
     },
     isSaving() {
-      return this.currentStatus === STATUS_SAVING;
+      return this.currentstatus === status_SAVING;
     },
     isSuccess() {
-      return this.currentStatus === STATUS_SUCCESS;
+      return this.currentstatus === status_SUCCESS;
     },
     isFailed() {
-      return this.currentStatus === STATUS_FAILED;
+      return this.currentstatus === status_FAILED;
     },
   },
   components: {
     VueCkeditor,
   },
   async created() {
-    this.currentStatus = STATUS_INITIAL;
+    this.currentstatus = status_INITIAL;
     this.config.toolbar = [
       {
         name: "document",

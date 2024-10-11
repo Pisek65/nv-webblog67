@@ -3,11 +3,11 @@
         <br><br>
         <h1>Show Blog</h1>
         <p>id: {{ blog.id }}</p>
-        <p>title: {{ blog.title }}</p>
+        <p>namecharacter: {{ blog.namecharacter }}</p>
         <!-- ใช้ v-html เพื่อแสดงเนื้อหาที่เป็น HTML -->
         <p>content: <span v-html="blog.content"></span></p>
-        <p>category: {{ blog.category }}</p>
-        <p>status: {{ blog.status }}</p>
+        <p>namefigure: {{ blog.namefigure }}</p>
+        <p>material: {{ blog.status }}</p>
         <p>
         <button v-on:click="navigateTo('/blog/edit/'+ blog.id)">แก้ไข blog</button>
         <button v-on:click="navigateTo('/blogs')">กลับ</button>

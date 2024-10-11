@@ -15,10 +15,10 @@
             </div>
             <!--ข้อมูล tag-->
             <ul class="categories">
-                <li v-for="(cate, index) in category" :key="index">
-                    <a @click.prevent="setCategory(cate)" href="#">{{ cate }}</a>
+                <li v-for="(nf, index) in category" :key="index">
+                    <a @click.prevent="setnamefigure(nf)" href="#">{{ nf }}</a>
                 </li>
-                <li class="clear"><a @click.prevent="setCategory(' ')" href="#">Clear</a></li>
+                <li class="clear"><a @click.prevent="setnamefigure('nf')" href="#">Clear</a></li>
             </ul>
             <div class="clearfix"></div>
         </header>
@@ -32,14 +32,15 @@
                 </div>
 
                 <div class="blog-info">
-                    <h3>{{ blog.title }}</h3>
+                    <h3>{{ blog.namecharacter }}</h3>
                     <!--เพิ่มตัวอักษรให้เยอะขึ้น-->
-                    <div v-html="blog.content.slice(0, 200) + '...'"></div>
-                    <p><strong>Category:</strong> {{ blog.category }}</p>
+                    <div v-html="blog.content.slice(0, 400)"></div>
+                    <p><strong>namefigure:</strong> {{ blog.namefigure }}</p>
                     <p><strong>Create:</strong> {{ formatDate(blog.createdAt) }}</p>
                     <p>
                         <button class="btn btn-sm btn-info" @click="navigateTo('/blog/' + blog.id)">View Blog</button>
-                        <button class="btn btn-sm btn-warning" @click="navigateTo('/blog/edit/' + blog.id)">Edit blog</button>
+                        <button class="btn btn-sm btn-warning" @click="navigateTo('/blog/edit/' + blog.id)">Edit
+                            blog</button>
                         <button class="btn btn-sm btn-danger" @click="deleteBlog(blog)">Delete</button>
                     </p>
                 </div>
@@ -60,7 +61,6 @@
 
 <script>
 import BlogsService from '@/services/BlogsService';
-import _ from 'lodash';
 import ScrollMonitor from 'scrollMonitor';
 
 const LOAD_NUM = 3;
@@ -79,19 +79,19 @@ export default {
         };
     },
     async created() {
-        this.allBlogs = (await BlogsService.index()).data; // ดึงข้อมูลทั้งหมดและเก็บไว้ใน allBlogs
-        this.results = this.allBlogs; // เริ่มต้นผลลัพธ์ด้วยบล็อกทั้งหมด
-        this.blogs = this.allBlogs.slice(0, LOAD_NUM); // แสดงบล็อกตามจำนวนที่ต้องการ
-        this.populateCategories(); // Populate categories
+        this.allBlogs = (await BlogsService.index()).data;
+        this.results = this.allBlogs;
+        this.blogs = this.allBlogs.slice(0, LOAD_NUM);
+        this.populateCategories();
     },
     computed: {
         filteredBlogs() {
             if (this.search.trim() === '') {
-                return this.allBlogs; // แสดงทั้งหมดหากไม่มีการค้นหา
+                return this.allBlogs;
             }
             return this.allBlogs.filter(blog =>
-                blog.title.toLowerCase().includes(this.search.toLowerCase()) ||
-                blog.category.toLowerCase().includes(this.search.toLowerCase())
+                blog.namefigure.toLowerCase().includes(this.search.toLowerCase()) ||
+                blog.namecharacter.toLowerCase().includes(this.search.toLowerCase())
             );
         },
     },
@@ -110,15 +110,15 @@ export default {
         async refreshData() {
             this.allBlogs = (await BlogsService.index()).data;
             this.results = this.allBlogs;
-            this.blogs = this.allBlogs.slice(0, LOAD_NUM); // อัปเดตข้อมูลให้แสดงตามจำนวน
+            this.blogs = this.allBlogs.slice(0, LOAD_NUM);
         },
-        setCategory(keyword) {
-            this.search = keyword === ' ' ? '' : keyword;
+        setnamefigure(nf) {
+            this.search = nf === 'nf' ? '' : nf;
         },
         populateCategories() {
             this.allBlogs.forEach(blog => {
-                if (!this.category.includes(blog.category)) {
-                    this.category.push(blog.category);
+                if (!this.category.includes(blog.namefigure)) {
+                    this.category.push(blog.namefigure);
                 }
             });
         },
@@ -127,17 +127,17 @@ export default {
             return new Date(dateString).toLocaleDateString('th-TH', options);
         },
     },
-    updated() {
+    mounted() {
         const sens = document.querySelector('#blog-list-bottom');
         pageWatcher = ScrollMonitor.create(sens);
         pageWatcher.enterViewport(this.appendResults);
     },
-    beforeUpdated() {
+    beforeDestroy() {
         if (pageWatcher) {
             pageWatcher.destroy();
             pageWatcher = null;
         }
-    },
+    }
 };
 </script>
 
@@ -156,7 +156,8 @@ export default {
 }
 
 .blog-list {
-    display: flex; /* ใช้ flexbox เพื่อจัดตำแหน่ง */
+    display: flex;
+    /* ใช้ flexbox เพื่อจัดตำแหน่ง */
     border: solid 1px #dfdfdf;
     margin-bottom: 10px;
     padding: 5px;
@@ -164,7 +165,8 @@ export default {
 }
 
 .blog-pic {
-    margin-right: 10px; /* เพิ่มระยะห่างระหว่างรูปภาพและข้อมูล */
+    margin-right: 10px;
+    /* เพิ่มระยะห่างระหว่างรูปภาพและข้อมูล */
 }
 
 .blog-info {
@@ -216,5 +218,4 @@ export default {
 
 .create-blog {
     margin-top: 10px;
-}
-</style>
+}</style>
