@@ -44,7 +44,7 @@ export default {
         this.$store.dispatch("setUser", response.data.user);
 
         this.$router.push({
-          name: "users",
+          name: "blogs",
         });
       } catch (error) {
         console.log(error);
